@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -12,88 +12,11 @@ import {
 
 export default function App() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [isSignup, setIsSignup] = useState(false);
-
-  const handleLogin = () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Please fill in all fields.");
-      return;
-    }
-    Alert.alert("Success", `Logged in with email: ${email}`);
-  };
-
-  const handleSignup = () => {
-    if (!email || !password || !confirmPassword) {
-      Alert.alert("Error", "Please fill in all fields.");
-      return;
-    }
-    if (password !== confirmPassword) {
-      Alert.alert("Error", "Passwords do not match.");
-      return;
-    }
-    Alert.alert("Success", `Account created for email: ${email}`);
-  };
-
-  const dismissKeyboard = () => {
-    Keyboard.dismiss();
-  };
 
   return (
-    <TouchableWithoutFeedback onPress={dismissKeyboard}>
-      <View style={styles.container}>
-        <Text style={styles.title}>{isSignup ? "Sign Up" : "Login"}</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#999"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          value={email}
-          onChangeText={setEmail}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor="#999"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
-
-        {isSignup && (
-          <TextInput
-            style={styles.input}
-            placeholder="Confirm Password"
-            placeholderTextColor="#999"
-            secureTextEntry
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-          />
-        )}
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={isSignup ? handleSignup : handleLogin}
-        >
-          <Text style={styles.buttonText}>{isSignup ? "Sign Up" : "Login"}</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => setIsSignup(!isSignup)}
-          style={styles.toggleButton}
-        >
-          <Text style={styles.toggleText}>
-            {isSignup
-              ? "Already have an account? Login"
-              : "Don't have an account? Sign Up"}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </TouchableWithoutFeedback>
+    <View>
+      
+    </View>
   );
 }
 
