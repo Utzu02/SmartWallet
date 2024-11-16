@@ -13,15 +13,10 @@ const CREDENTIALS_PATH = path.join(process.cwd(), 'credentials.json');
 // Funcție care verifică dacă un text conține cuvinte cheie care sugerează că este o factură
 const isInvoice = (text) => {
   const invoiceKeywords = [
-    "factura", "invoice", "nr. factura", "numar factura","garantie", "data facturii",
-    "emitent", "furnizor", "client", "total de plata", "suma totala", "tva",
-    "cota tva", "termen de plata", "plata restanta", "data scadentei", 
-    "modalitati de plata", "cont bancar", "cod fiscal", "detalii plata", 
-    "factura proforma", "achitat", "subtotal", "discount", "ref:", 
-    "servicii", "produse", "valoare totala", "factura fiscala", 
-    "suma de plata", "ordin de plata", "numar comanda", "evidenta contabila",
-    "plata efectuata", "factura originala", "factura curenta", "livrare", 
-    "total fara tva"
+    "invoice", "nr. factura", "numar factura", "data facturii", "total de plata", "suma totala", "valoare TVA", "valoare articole",
+    "cota tva", "termen de plata", "plata restanta", "data scadentei", "cod fiscal", "detalii plata", 
+    "factura proforma", "subtotal", "factura fiscala", 
+    "suma de plata", "ordin de plata", "numar comanda", "factura originala", "factura curenta","total fara tva"
   ];
 
   // Elimină diacriticele și face textul case-insensitive
@@ -87,7 +82,7 @@ const extractAttachments = (payload, extensions) => {
   findAttachments(payload.parts || []);
   return attachments;
 };
-
+const invoices = [];
 /**
  * Citește fișierul PDF și verifică dacă conține o factură.
  * 
@@ -166,9 +161,11 @@ async function listMessagesWithAllAttachments(auth) {
             const isInvoiceFile = await checkIfPdfIsInvoice(pdfBuffer);
 
             if (isInvoiceFile) {
-              console.log(`Domeniu expeditor (din email): ${domainPart}`);
-              console.log(`Fișierul "${attachment.filename}" este o factură.`);
-              console.log('=====================================================');
+              invoices.push({
+                domain: domainPart,
+                filename: attachment.filename,
+                PDF: await pdfParse(pdfBuffer),
+              });
             }
           }
         }));
@@ -177,6 +174,13 @@ async function listMessagesWithAllAttachments(auth) {
   } catch (error) {
     console.error('Error fetching messages:', error);
   }
+  invoices.sort((a, b) => a.domain.localeCompare(b.domain));
+  invoices.forEach((invoice) => {
+    console.log(`Domeniu expeditor: ${invoice.domain}`);
+    console.log(`Fișier: ${invoice.filename}`);
+    console.log('=====================================================');
+  });
+  console.log("FINISH");
 }
 
 // Verifică starea și începe procesul

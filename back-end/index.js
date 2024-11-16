@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 
-import productRoute from './Routes/productRoute.js';
 import config from './config.js';
 import emailCrawler from './email-crawler.js';
 
