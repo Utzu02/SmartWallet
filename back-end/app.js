@@ -34,7 +34,6 @@ app.get('/', (req, res) => {
     res.send('Hello World');
 });
 
-console.log(SERVER_PORT);
 app.listen(SERVER_PORT, () => {
     console.log(`Listening on ${SERVER_HOST}:${SERVER_PORT}`);
 });

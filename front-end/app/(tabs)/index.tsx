@@ -11,11 +11,10 @@ import {
 } from "react-native";
 
 export default function App() {
-  const [email, setEmail] = useState("");
 
   return (
     <View>
-      
+      <Text>1</Text>
     </View>
   );
 }

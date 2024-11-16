@@ -13,6 +13,7 @@ const auth = getAuth();
 class FirebaseAuthController {
   registerUser(req, res) {
     const { email, password } = req.body;
+    console.log(email, password);
     if (!email || !password) {
       return res.status(422).json({
         email: "Email is required",
@@ -21,7 +22,6 @@ class FirebaseAuthController {
     }
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
-        console.log(userCredential);
         sendEmailVerification(auth.currentUser)
           .then(() => {
             res.status(201).json({ message: "Verification email sent! User created successfully!" });
@@ -39,7 +39,6 @@ class FirebaseAuthController {
 
   loginUser(req, res) {
     const { email, password } = req.body;
-    console.log(email, password);
     if (!email || !password) {
       return res.status(422).json({
         email: "Email is required",
@@ -48,7 +47,6 @@ class FirebaseAuthController {
     }
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
-        console.log(userCredential);
         const idToken = userCredential._tokenResponse.idToken
         if (idToken) {
           res.cookie('access_token', idToken, {
