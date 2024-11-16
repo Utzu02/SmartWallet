@@ -26,13 +26,26 @@ const isInvoice = (text) => {
 
 // Funcție pentru a extrage suma totală plătită
 const extractTotalAmount = (text) => {
-  const regex = /(\d+(?:[\.,]\d{1,2})?)\s*(RON|LEI|RONI|LEU)/i;
-  const match = text.match(regex);
-  if (match) {
-    const amount = parseFloat(match[1].replace(',', '.'));
-    return amount;
+  const regex = /\s?(\d+(?:[\.,]\d{1,2})?)\s*(RON|LEI|RONI|LEU)/gi;  // Căutăm toate numerele urmate de RON, LEI etc.
+  const matches = [];
+  let match;
+
+  while ((match = regex.exec(text)) !== null) {
+    const amountString = match[1].replace(',', '.');
+    const precedingChar = text[match.index - 1];  // Caracterul care precede suma
+
+    // Verificăm dacă înainte de sumă există o literă
+    if (/[a-zA-Z]/.test(precedingChar)|| precedingChar == '.') {
+      // Dacă există literă, ignorăm această sumă
+      continue;
+    }
+
+    // Dacă suma este validă, o adăugăm în lista de sume
+    const amount = parseFloat(amountString);
+    matches.push(amount);
   }
-  return 0;
+
+  return matches; // Returnăm lista de sume găsite
 };
 
 // Încarcă credențialele salvate, dacă există
@@ -182,23 +195,25 @@ async function listMessagesWithAllAttachments(auth) {
             if (isInvoiceFile) {
               const pdfText = await pdfParse(pdfBuffer);
 
-              // Extrage suma totală din textul facturii
-              const totalAmount = extractTotalAmount(pdfText.text);
+              // Extrage toate sumele din textul facturii
+              const totalAmounts = extractTotalAmount(pdfText.text);
 
-              // Adăugăm factura în vector
-              invoicesArray.push({
-                domain: domainPart,
-                filename: attachment.filename,
-                PDF: pdfText,
-                totalAmount: totalAmount,
+              // Adăugăm facturile în vector
+              totalAmounts.forEach(totalAmount => {
+                invoicesArray.push({
+                  domain: domainPart,
+                  filename: attachment.filename,
+                  PDF: pdfText,
+                  totalAmount: totalAmount,
+                });
+
+                // Actualizăm suma totală în mapa pentru domenii
+                if (domainTotalMap.has(domainPart)) {
+                  domainTotalMap.set(domainPart, domainTotalMap.get(domainPart) + totalAmount);
+                } else {
+                  domainTotalMap.set(domainPart, totalAmount);
+                }
               });
-
-              // Actualizăm suma totală în mapa pentru domenii
-              if (domainTotalMap.has(domainPart)) {
-                domainTotalMap.set(domainPart, domainTotalMap.get(domainPart) + totalAmount);
-              } else {
-                domainTotalMap.set(domainPart, totalAmount);
-              }
             }
           }
         }));
