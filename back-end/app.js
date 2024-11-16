@@ -11,7 +11,7 @@ const SERVER_HOST = process.env.SERVER_HOST || '0.0.0.0';
 
 const app = express();
 
-emailCrawler();
+emailCrawler(300);
 
 app.use(cors({
     origin: ['*'], 

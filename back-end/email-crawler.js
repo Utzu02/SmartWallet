@@ -24,6 +24,17 @@ const isInvoice = (text) => {
   return invoiceKeywords.some(keyword => normalizedText.includes(remove(keyword).toLowerCase()));
 };
 
+// Funcție pentru a extrage suma totală plătită
+const extractTotalAmount = (text) => {
+  const regex = /(\d+(?:[\.,]\d{1,2})?)\s*(RON|LEI|RONI|LEU)/i;
+  const match = text.match(regex);
+  if (match) {
+    const amount = parseFloat(match[1].replace(',', '.'));
+    return amount;
+  }
+  return 0;
+};
+
 // Încarcă credențialele salvate, dacă există
 async function loadSavedCredentialsIfExist() {
   try {
@@ -82,7 +93,7 @@ const extractAttachments = (payload, extensions) => {
   findAttachments(payload.parts || []);
   return attachments;
 };
-const invoices = [];
+
 /**
  * Citește fișierul PDF și verifică dacă conține o factură.
  * 
@@ -111,11 +122,19 @@ const extractDomain = (email) => {
   return domainMatch;
 };
 
+// Vector pentru stocarea facturilor
+const invoicesArray = [];
+
+// Mapa pentru stocarea sumelor totale de plată pentru fiecare domeniu
+const domainTotalMap = new Map();
+
 /**
  * Listează și extrage atașamentele din mesajele Gmail și verifică dacă conțin facturi.
  * 
  * @param {google.auth.OAuth2} auth Un client OAuth2 autorizat.
  */
+var maxSettedResults;
+
 async function listMessagesWithAllAttachments(auth) {
   const gmail = google.gmail({ version: 'v1', auth });
   const extensions = ['.pdf', '.docx', '.xlsx']; // Extensiile de fișiere relevante
@@ -124,7 +143,7 @@ async function listMessagesWithAllAttachments(auth) {
     // Obține lista de mesaje care au atașamente
     const res = await gmail.users.messages.list({
       userId: 'me',
-      maxResults: 500, // Modifică după necesitate pentru a obține mai multe mesaje
+      maxResults: maxSettedResults, // Modifică după necesitate pentru a obține mai multe mesaje
       q: 'has:attachment' // Filtrare doar pentru mesaje cu atașamente
     });
 
@@ -161,11 +180,25 @@ async function listMessagesWithAllAttachments(auth) {
             const isInvoiceFile = await checkIfPdfIsInvoice(pdfBuffer);
 
             if (isInvoiceFile) {
-              invoices.push({
+              const pdfText = await pdfParse(pdfBuffer);
+
+              // Extrage suma totală din textul facturii
+              const totalAmount = extractTotalAmount(pdfText.text);
+
+              // Adăugăm factura în vector
+              invoicesArray.push({
                 domain: domainPart,
                 filename: attachment.filename,
-                PDF: await pdfParse(pdfBuffer),
+                PDF: pdfText,
+                totalAmount: totalAmount,
               });
+
+              // Actualizăm suma totală în mapa pentru domenii
+              if (domainTotalMap.has(domainPart)) {
+                domainTotalMap.set(domainPart, domainTotalMap.get(domainPart) + totalAmount);
+              } else {
+                domainTotalMap.set(domainPart, totalAmount);
+              }
             }
           }
         }));
@@ -174,19 +207,33 @@ async function listMessagesWithAllAttachments(auth) {
   } catch (error) {
     console.error('Error fetching messages:', error);
   }
-  invoices.sort((a, b) => a.domain.localeCompare(b.domain));
-  invoices.forEach((invoice) => {
+
+  // Sortează facturile în funcție de domeniu
+  invoicesArray.sort((a, b) => a.domain.localeCompare(b.domain));
+
+  // Afișează facturile procesate
+  invoicesArray.forEach((invoice) => {
     console.log(`Domeniu expeditor: ${invoice.domain}`);
     console.log(`Fișier: ${invoice.filename}`);
+    console.log(`Suma totală: ${invoice.totalAmount} RON`);
     console.log('=====================================================');
   });
+
+  // Afișează suma totală de plată pentru fiecare domeniu
+  console.log('Suma totală de plată pentru fiecare domeniu:');
+  domainTotalMap.forEach((total, domain) => {
+    console.log(`${domain}: ${total} RON`);
+  });
+
   console.log("FINISH");
 }
 
 // Verifică starea și începe procesul
 
 // Autentifică și afișează toate atașamentele
-const emailCrawl = () => {
-    return authorize().then(listMessagesWithAllAttachments).catch(console.error);
+const emailCrawl = (x) => {
+  maxSettedResults = x;
+  return authorize().then(listMessagesWithAllAttachments).catch(console.error);
 };
+
 export default emailCrawl;
