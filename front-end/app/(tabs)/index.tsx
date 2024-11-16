@@ -1,74 +1,146 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  Keyboard,
+  TouchableWithoutFeedback,
+} from "react-native";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+export default function App() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isSignup, setIsSignup] = useState(false);
 
-export default function HomeScreen() {
+  const handleLogin = () => {
+    if (!email || !password) {
+      Alert.alert("Error", "Please fill in all fields.");
+      return;
+    }
+    Alert.alert("Success", `Logged in with email: ${email}`);
+  };
+
+  const handleSignup = () => {
+    if (!email || !password || !confirmPassword) {
+      Alert.alert("Error", "Please fill in all fields.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match.");
+      return;
+    }
+    Alert.alert("Success", `Account created for email: ${email}`);
+  };
+
+  const dismissKeyboard = () => {
+    Keyboard.dismiss();
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <TouchableWithoutFeedback onPress={dismissKeyboard}>
+      <View style={styles.container}>
+        <Text style={styles.title}>{isSignup ? "Sign Up" : "Login"}</Text>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          placeholderTextColor="#999"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          placeholderTextColor="#999"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+
+        {isSignup && (
+          <TextInput
+            style={styles.input}
+            placeholder="Confirm Password"
+            placeholderTextColor="#999"
+            secureTextEntry
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+          />
+        )}
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={isSignup ? handleSignup : handleLogin}
+        >
+          <Text style={styles.buttonText}>{isSignup ? "Sign Up" : "Login"}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => setIsSignup(!isSignup)}
+          style={styles.toggleButton}
+        >
+          <Text style={styles.toggleText}>
+            {isSignup
+              ? "Already have an account? Login"
+              : "Don't have an account? Sign Up"}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    backgroundColor: "#f8f8f8",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  title: {
+    fontSize: 32,
+    fontWeight: "bold",
+    marginBottom: 20,
+    color: "#333",
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  input: {
+    width: "100%",
+    height: 50,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
+  button: {
+    width: "100%",
+    height: 50,
+    backgroundColor: "#007bff",
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 10,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  toggleButton: {
+    marginTop: 10,
+  },
+  toggleText: {
+    color: "#007bff",
+    fontSize: 16,
+    fontWeight: "500",
   },
 });
