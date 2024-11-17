@@ -5,9 +5,9 @@ export default function App() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.introContainer}>
-        <Text style={styles.introTitle}>De ce suntem unici?</Text>
+        <Text style={styles.introTitle}>Cine suntem noi?</Text>
         <Text style={styles.introText}>
-          Aplicația noastră redefinește modul în care gestionezi documentele importante. Cu un design intuitiv și funcționalități avansate, îți oferim o soluție completă:
+          SmartWallet redefinește modul în care gestionezi documentele importante. Cu un design intuitiv și funcționalități avansate, îți oferim o soluție completă:
           {"\n\n"}- <Text style={styles.bold}>Scanare instantanee:</Text> Transformă rapid bonuri și facturi în documente digitale clare, direct de pe camera telefonului.
           {"\n\n"}- <Text style={styles.bold}>Import inteligent din email:</Text> Recuperează automat facturile primite pe email, economisind timp prețios.
           {"\n\n"}- <Text style={styles.bold}>Organizare simplificată:</Text> Toate documentele tale, într-un singur loc, accesibile oricând, oriunde.
