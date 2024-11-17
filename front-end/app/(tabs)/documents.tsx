@@ -1,53 +1,77 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Button, Alert } from 'react-native';
+import DocumentScanner from "react-native-document-scanner-plugin";
+import { PDFDocument, rgb } from 'pdf-lib';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 
-export default function Documents() {
+const Documents = () => {
+  const [scannedImages, setScannedImages] = useState([]);
+
+  const openScanner = async () => {
+    try {
+      const { scannedImages } = await DocumentScanner.scanDocument();
+      if (scannedImages.length > 0) {
+        setScannedImages(scannedImages);
+        Alert.alert('Scan complet', 'Documentul a fost scanat cu succes!');
+      }
+    } catch (error) {
+      console.error('Eroare la scanare:', error);
+      Alert.alert('Eroare', 'Nu s-a putut scana documentul.');
+    }
+  };
+
+  const createPDF = async () => {
+    try {
+      const pdfDoc = await PDFDocument.create();
+
+      for (const image of scannedImages) {
+        const imageBytes = await FileSystem.readAsStringAsync(image.uri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+
+        const embeddedImage = await pdfDoc.embedJpg(imageBytes);
+        const page = pdfDoc.addPage([embeddedImage.width, embeddedImage.height]);
+
+        page.drawImage(embeddedImage, {
+          x: 0,
+          y: 0,
+          width: embeddedImage.width,
+          height: embeddedImage.height,
+        });
+      }
+
+      const pdfBytes = await pdfDoc.save();
+      const pdfPath = `${FileSystem.documentDirectory}scanned_document.pdf`;
+
+      await FileSystem.writeAsStringAsync(pdfPath, pdfBytes, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      Alert.alert('PDF generat', 'Documentul a fost salvat ca PDF!');
+      sharePDF(pdfPath);
+    } catch (error) {
+      console.error('Eroare la generarea PDF-ului:', error);
+      Alert.alert('Eroare', 'Nu s-a putut crea PDF-ul.');
+    }
+  };
+
+  const sharePDF = async (pdfPath) => {
+    if (await Sharing.isAvailableAsync()) {
+      await Sharing.shareAsync(pdfPath);
+    } else {
+      Alert.alert('Eroare', 'Partajarea nu este disponibilă pe acest dispozitiv.');
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Documents Page</Text>
-      <Text style={styles.subtitle}>Here are your documents:</Text>
-      <View style={styles.documentItem}>
-        <Text style={styles.documentText}>Document 1</Text>
-      </View>
-      <View style={styles.documentItem}>
-        <Text style={styles.documentText}>Document 2</Text>
-      </View>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Button title="Deschide Scanner" onPress={openScanner} />
+      {scannedImages.length > 0 && <Button title="Creează PDF" onPress={createPDF} />}
     </View>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8f8f8',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#333',
-  },
-  subtitle: {
-    fontSize: 18,
-    marginBottom: 20,
-    color: '#666',
-  },
-  documentItem: {
-    width: '100%',
-    height: 50,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    justifyContent: 'center',
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  documentText: {
-    fontSize: 16,
-    color: '#333',
-  },
-});
+export default Documents;
+
+
