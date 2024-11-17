@@ -1,68 +1,50 @@
-import React, { useEffect, useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  Keyboard,
-  TouchableWithoutFeedback,
-} from "react-native";
+import React from "react";
+import { StyleSheet, Text, View, ScrollView } from "react-native";
 
 export default function App() {
-
   return (
-    <View>
-      <Text>1</Text>
-    </View>
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.introContainer}>
+        <Text style={styles.introTitle}>De ce suntem unici?</Text>
+        <Text style={styles.introText}>
+          Aplicația noastră redefinește modul în care gestionezi documentele importante. Cu un design intuitiv și funcționalități avansate, îți oferim o soluție completă:
+          {"\n\n"}- <Text style={styles.bold}>Scanare instantanee:</Text> Transformă rapid bonuri și facturi în documente digitale clare, direct de pe camera telefonului.
+          {"\n\n"}- <Text style={styles.bold}>Import inteligent din email:</Text> Recuperează automat facturile primite pe email, economisind timp prețios.
+          {"\n\n"}- <Text style={styles.bold}>Organizare simplificată:</Text> Toate documentele tale, într-un singur loc, accesibile oricând, oriunde.
+          {"\n\n"}- <Text style={styles.bold}>Tehnologie de ultimă generație:</Text> Algoritmii noștri avansați asigură acuratețea și rapiditatea procesării.
+          {"\n\n"}Cu aplicația noastră, te bucuri de mai mult timp liber și control deplin asupra finanțelor tale. Simplu. Rapid. Inteligent.
+        </Text>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#f8f8f8",
-    alignItems: "center",
-    justifyContent: "center",
+    flexGrow: 1,
     padding: 20,
+    backgroundColor: "#f8f8f8",
   },
-  title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    marginBottom: 20,
-    color: "#333",
-  },
-  input: {
-    width: "100%",
-    height: 50,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: "#ddd",
-  },
-  button: {
-    width: "100%",
-    height: 50,
+  introContainer: {
     backgroundColor: "#007bff",
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 10,
+    padding: 20,
+    borderRadius: 10,
+    marginBottom: 20,
   },
-  buttonText: {
-    color: "#fff",
-    fontSize: 18,
+  introTitle: {
+    color: "white",
+    fontSize: 22,
     fontWeight: "bold",
+    marginBottom: 15,
+    textAlign: "center",
   },
-  toggleButton: {
-    marginTop: 10,
-  },
-  toggleText: {
-    color: "#007bff",
+  introText: {
+    color: "white",
     fontSize: 16,
-    fontWeight: "500",
+    lineHeight: 24, // Ajustare pentru o lectură echilibrată
+    textAlign: "justify", // Aliniere justificată
+  },
+  bold: {
+    fontWeight: "bold",
   },
 });

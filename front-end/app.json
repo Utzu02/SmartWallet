@@ -8,9 +8,12 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.utzu.frontend"
+      "infoPlist": {
+        "NSCameraUsageDescription": "Aplicația are nevoie de acces la cameră pentru a scana documente.",
+        "NSPhotoLibraryUsageDescription": "Aplicația are nevoie de acces la biblioteca foto pentru a selecta imagini."
+      }
     },
     "android": {
       "adaptiveIcon": {
