@@ -10,45 +10,72 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import * as Linking from 'expo-linking';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from './App';
+import { Camera } from 'expo-camera';
 import { useRouter } from 'expo-router';
 
-type DocumentScannerProps = NativeStackScreenProps<RootStackParamList, 'Acasă'>;
-
-const DocumentScanner: React.FC<DocumentScannerProps> = ({ navigation }) => {
+const DocumentScanner = () => {
   const router = useRouter();
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [cameraPermission, setCameraPermission] = useState<boolean | null>(null);
+  const [galleryPermission, setGalleryPermission] = useState<boolean | null>(null);
   const [currentMode, setCurrentMode] = useState<string | null>(null); // "bon" sau "factura"
 
-  const handleReportButtonPress = () => {
-    Alert.alert(
-      'În curs de implementare',
-      'Această funcționalitate va fi disponibilă în curând!',
-      [{ text: 'OK', style: 'default' }]
-    );
+  // Request permission for camera
+  const requestCameraPermission = async () => {
+    const { status } = await Camera.requestCameraPermissionsAsync();
+    setCameraPermission(status === 'granted');
+    return status === 'granted';
   };
 
-  const requestPermissions = async (
-    permissionType: () => Promise<{ status: ImagePicker.PermissionStatus }>
-  ): Promise<boolean> => {
-    const { status } = await permissionType();
-    if (status !== 'granted') {
-      Alert.alert(
-        'Permisiuni necesare',
-        'Te rugăm să activezi permisiunile necesare din setările dispozitivului.',
-        [
-          { text: 'Anulează', style: 'cancel' },
-          { text: 'Deschide Setări', onPress: () => Linking.openSettings() },
-        ]
-      );
-      return false;
+  // Request permission for gallery
+  const requestGalleryPermission = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    setGalleryPermission(status === 'granted');
+    return status === 'granted';
+  };
+
+  // Open camera and capture an image
+  const handleOpenCamera = async () => {
+    const hasPermission = await requestCameraPermission();
+    if (!hasPermission) {
+      Alert.alert('Permisiune refuzată', 'Nu s-a acordat acces la cameră.');
+      return;
     }
-    return true;
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+      setModalVisible(false);
+    }
   };
 
+  // Open gallery to select an image
+  const handleOpenGallery = async () => {
+    const hasPermission = await requestGalleryPermission();
+    if (!hasPermission) {
+      Alert.alert('Permisiune refuzată', 'Nu s-a acordat acces la galerie.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+      setModalVisible(false);
+    }
+  };
+
+  // Open modal and set current mode
   const handleOpenModal = (mode: string) => {
     setCurrentMode(mode); // Stochează modul curent: "bon" sau "factura"
     setModalVisible(true);
@@ -70,7 +97,7 @@ const DocumentScanner: React.FC<DocumentScannerProps> = ({ navigation }) => {
         <Text style={styles.addButtonText}>Gestionează categoriile</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.addButton} onPress={handleReportButtonPress}>
+      <TouchableOpacity style={styles.addButton} onPress={() => Alert.alert('În lucru')}>
         <Text style={styles.addButtonText}>Vizualizează raportul de decont</Text>
       </TouchableOpacity>
 
@@ -88,10 +115,10 @@ const DocumentScanner: React.FC<DocumentScannerProps> = ({ navigation }) => {
               <Text style={styles.modalTitle}>
                 Selectează o opțiune pentru {currentMode === 'bon' ? 'bon' : 'factură'}
               </Text>
-              <TouchableOpacity style={styles.modalButton} onPress={() => {}}>
+              <TouchableOpacity style={styles.modalButton} onPress={handleOpenCamera}>
                 <Text style={styles.modalButtonText}>Deschide Camera</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.modalButton} onPress={() => {}}>
+              <TouchableOpacity style={styles.modalButton} onPress={handleOpenGallery}>
                 <Text style={styles.modalButtonText}>Selectează din Galerie</Text>
               </TouchableOpacity>
             </View>
@@ -136,7 +163,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
-    marginVertical: 10, // Spațiu uniform între butoane
+    marginVertical: 10,
   },
   addButtonText: {
     color: 'white',
