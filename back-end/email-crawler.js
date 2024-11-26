@@ -18,7 +18,7 @@ const isInvoice = (text) => {
     "factura proforma", "subtotal", "factura fiscala", 
     "suma de plata", "ordin de plata", "numar comanda", "factura originala", "factura curenta","total fara tva"
   ];
-
+  const x=0;
   // Elimină diacriticele și face textul case-insensitive
   const normalizedText = remove(text).toLowerCase();
   return invoiceKeywords.some(keyword => normalizedText.includes(remove(keyword).toLowerCase()));
